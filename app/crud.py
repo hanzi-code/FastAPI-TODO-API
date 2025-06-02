@@ -1,7 +1,7 @@
 from sqlalchemy.orm import Session
 from . import models, schemas
 
-def get_all_todos():
+def get_all_todos(db):
     return db.query(models.Todo).all()
 
 def create_todos(db: Session, todo: schemas.TodoCreate):

@@ -24,7 +24,7 @@ def read_todos(db: Session = Depends(get_db)):
 
 @app.post("/todos", response_model = schemas.TodoOut, status_code = 201)
 def create_todo(todo: schemas.TodoCreate, db: Session = Depends(get_db)):
-    return crud.create_todo(db, todo)
+    return crud.create_todos(db, todo)
 
 @app.put("/todos/{todo_id}", response_model = schemas.TodoOut)
 def complete_todo(todo_id: int, db: Session = Depends(get_db)):
