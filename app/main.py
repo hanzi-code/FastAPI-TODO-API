@@ -1,32 +1,41 @@
-from fastapi import FastAPI, HTTPException
-from . import crud
-from .schemas import TodoCreate, Todo
+from fastapi import FastAPI, Depends, HTTPException
+from sqlalchemy import Session
+from . import models, schemas, crud
+from .database import SessionLocal, engine, Base
 
+Base.metadata.create_all(bind=engine)
 
 app = FastAPI()
+
+def get_db():
+    db = SessionLocal()
+    try:
+        yield db
+    finally:
+        db.close()
 
 @app.get("/")
 def read_root():
     return {"message": "Bem-vindo à API TODO"}
 
-@app.get("/todos", response_model = list[Todo])
-def get_todos():
-    return crud.get_all_todos()
+@app.get("/todos", response_model = list[schemas.TodoOut])
+def read_todos(db: Session = Depends(get_db)):
+    return crud.get_all_todos(db)
 
-@app.post("/todos", response_model = Todo, status_code = 201)
-def create_todo(todo: TodoCreate):
-    return crud.create_todo(todo)
+@app.post("/todos", response_model = schemas.TodoOut, status_code = 201)
+def create_todo(todo: schemas.TodoCreate, db: Session = Depends(get_db)):
+    return crud.create_todo(db, todo)
 
-@app.put("/todos/{todo_id}", response_model = Todo)
-def complete_todo(todo_id: int):
-    updated = crud.update_todo(todo_id)
-    if not updated:
+@app.put("/todos/{todo_id}", response_model = schemas.TodoOut)
+def complete_todo(todo_id: int, db: Session = Depends(get_db)):
+    todo = crud.update_todo(db, todo_id)
+    if not todo:
         raise HTTPException(status_code = 404, detail = "TODO não encontrado")
-    return updated
+    return todo
 
-@app.delete("/todos/{todo_id}", response_model = Todo)
-def delete_todo(todo_id: int):
-    deleted = crud.delete_todo(todo_id)
-    if not deleted:
+@app.delete("/todos/{todo_id}", response_model = schemas.TodoOut)
+def delete_todo(todo_id: int, db: Session = Depends(get_db)):
+    todo = crud.delete_todo(db, todo_id)
+    if not todo:
         raise HTTPException(status_code = 404, detail = "TODO não encontrado")
-    return deleted
+    return todo
