@@ -1,4 +1,9 @@
-todos = [
-        {"id": 1, "title": "TODO 1", "completed": False},
-        {"id": 2, "title": "TODO 2", "completed": True},
-        ]
+from sqlalchemy import Column, Integer, String, Boolean
+from .database import Base
+
+class Todo(Base):
+        __tablename__ = "todos"
+
+        id = Column(Integer, primary_key=True, index=True)
+        title = Column(String, index=True)
+        completed = Column(Boolean, default=False)
