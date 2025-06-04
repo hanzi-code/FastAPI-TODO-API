@@ -1,2 +1,2 @@
 # FastAPI
-Uma simples API para uma TODO list.
+FastAPI Todo List.
